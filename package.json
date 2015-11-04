@@ -1,0 +1,32 @@
+{
+  "name": "generator-node-test",
+  "version": "0.1.0",
+  "description": "Yeoman generator that scaffolds a TDD-ready node project",
+  "license": "MIT",
+  "main": "app/index.js",
+  "repository": "dmarchena/generator-node-test",
+  "author": {
+    "name": "David Marchena",
+    "email": "",
+    "url": "https://github.com/dmarchena"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "files": [
+    "generators"
+  ],
+  "keywords": [
+    "yeoman-generator"
+  ],
+  "dependencies": {
+    "chalk": "^1.0.0",
+    "deep-extend": "^0.4.0",
+    "underscore.string": "^3.2.2",
+    "yeoman-generator": "^0.21.1",
+    "yosay": "^1.0.2"
+  },
+  "devDependencies": {
+    "mocha": "*"
+  }
+}
