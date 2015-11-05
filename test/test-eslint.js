@@ -33,13 +33,13 @@ describe('node-test:eslint', function () {
     assert.fileContent('.eslintrc', /"env": {\s*"node": true\s*}/);
   });
 
-  describe('--es6', function () {
+  describe('--es2015', function () {
     before(function (done) {
       runGeneratorWithOptions(done, {
-        es6: true
+        es2015: true
       });
     });
-    it('fills es6 related options', function () {
+    it('fills ES2015 related options', function () {
       assert.fileContent('.eslintrc', /"es6": true/);
       assert.fileContent('.eslintrc', /"ecmaFeatures": {\s*"modules": true\s*}/);
     });
@@ -86,11 +86,11 @@ describe('node-test:eslint', function () {
       });
     });
 
-    describe('--es6', function () {
+    describe('--es2015', function () {
       before(function (done) {
         runGeneratorWithOptions(done, {
           config: 'airbnb',
-          es6: true
+          es2015: true
         });
       });
       it('fills extends Airbnb\'s base rules', function () {

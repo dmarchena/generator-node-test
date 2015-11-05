@@ -18,10 +18,10 @@ module.exports = generators.Base.extend({
       desc: 'Allow React syntax'
     });
 
-    this.option('es6', {
+    this.option('es2015', {
       required: false,
       defaults: false,
-      desc: 'Allow ES6 syntax'
+      desc: 'Allow ES2015 syntax'
     });
   },
 
@@ -47,7 +47,7 @@ module.exports = generators.Base.extend({
             }
           });
         }
-        if (this.options.es6) {
+        if (this.options.es2015) {
           extend(eslintrc, {
             ecmaFeatures: {
               modules: true
@@ -63,7 +63,7 @@ module.exports = generators.Base.extend({
 
         if (this.options.react) {
           config = 'airbnb';
-        } else if (this.options.es6) {
+        } else if (this.options.es2015) {
           config = 'airbnb/base';
         }
 
@@ -131,7 +131,7 @@ module.exports = generators.Base.extend({
             'eslint-plugin-react': '*'
           }
         });
-      } else if (this.options.es6) {
+      } else if (this.options.es2015) {
         extend(pkg, {
           devDependencies: {
             'babel-eslint': '*'
