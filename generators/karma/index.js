@@ -6,10 +6,22 @@ module.exports = generators.Base.extend({
   constructor: function () {
     generators.Base.apply(this, arguments);
 
+    this.option('chai', {
+      required: false,
+      defaults: false,
+      desc: 'Use chai assertion library'
+    });
+
     this.option('coverage', {
       required: false,
       defaults: false,
       desc: 'Coverage'
+    });
+
+    this.option('covReporters', {
+      required: false,
+      defaults: ['console'],
+      desc: 'Coverage reporters'
     });
 
     this.option('es2015', {
@@ -37,13 +49,45 @@ module.exports = generators.Base.extend({
     });
   },
 
+  initializing: {
+    setDevDependencies: function () {
+      this.npm = {
+        devDependencies: [
+          'browserify',
+          'karma',
+          'karma-browserify',
+          'karma-phantomjs-launcher',
+          'phantomjs',
+          'phantomjs-polyfill'
+        ]
+      }
+
+      if (this.options.coverage) {
+        this.npm.devDependencies.push('browserify-istanbul', 'karma-coverage');
+      }
+      if (this.options.testFramework === 'jasmine') {
+        this.npm.devDependencies.push('jasmine-core', 'karma-jasmine');
+      } else if (this.options.testFramework === 'mocha') {
+        this.npm.devDependencies.push('mocha', 'karma-mocha');
+        if (this.options.chai) {
+          this.npm.devDependencies.push('chai');
+        }
+      }
+      if (this.options.travisci) {
+        this.npm.devDependencies.push('karma-firefox-launcher');
+      }
+    }
+  },
+
   writing: {
     karmaconf: function () {
       this.fs.copyTpl(
         this.templatePath('karma.conf.js'),
         this.destinationPath('karma.conf.js'),
         {
+          chai: this.options.chai,
           coverage: this.options.coverage,
+          covReporters: this.options.covReporters,
           es2015: this.options.es2015,
           react: this.options.react,
           testFramework: this.options.testFramework,
@@ -52,53 +96,31 @@ module.exports = generators.Base.extend({
       );
     },
 
-    package: function () {
+    packageJson: function () {
       var pkg = this.fs.readJSON(this.destinationPath('package.json'), {});
 
       extend(pkg, {
-        devDependencies: {
-          'browserify': '*',
-          'karma': '*',
-          'karma-browserify': '*',
-          'karma-phantomjs-launcher': '*',
-          'phantomjs': '*',
-          'phantomjs-polyfill': '*',
+        scripts: {
+          "karma": "karma start ./karma.conf.js",
         }
       });
 
-      if (this.options.es2015 || this.options.react) {
-        extend(pkg, {
-          devDependencies: {
-            'karma-babelify': '*'
-          }
-        });
-      }
-
-      if (this.options.testFramework === 'jasmine') {
-        extend(pkg, {
-          devDependencies: {
-            'karma-jasmine': '*',
-            'jasmine-core': '*',
-          }
-        });
-      } else if (this.options.testFramework === 'mocha') {
-        extend(pkg, {
-          devDependencies: {
-            'karma-mocha': '*',
-            'mocha': '*',
-          }
-        });
-      }
-
-      if (this.options.travisci) {
-        extend(pkg, {
-          devDependencies: {
-            'karma-firefox-launcher': '*'
-          }
-        });
-      }
-
       this.fs.writeJSON(this.destinationPath('package.json'), pkg);
+    },
+
+    testPackageJson: function () {
+      var pkg = null;
+      if (this.options.skipInstall){
+        pkg = this.fs.readJSON(this.destinationPath('package.json'), {});
+        for (var i in this.npm.devDependencies) {
+          extend(pkg, JSON.parse('{ "devDependencies": { "' + this.npm.devDependencies[i] + '": "*" } }'));
+        }
+        this.fs.writeJSON(this.destinationPath('package.json'), pkg);
+      }
     }
+  },
+
+  install: function(){
+    this.npmInstall(this.npm.devDependencies, { saveDev: true });
   }
 });

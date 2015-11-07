@@ -25,6 +25,23 @@ module.exports = generators.Base.extend({
     });
   },
 
+  initializing: {
+    setDevDependencies: function () {
+      this.npm = {
+        devDependencies: ['eslint']
+      };
+
+      if (this.options.config === 'airbnb') {
+        this.npm.devDependencies.push('eslint-config-airbnb');
+      }
+      if (this.options.react) {
+        this.npm.devDependencies.push('babel-eslint', 'eslint-plugin-react');
+      } else if (this.options.es2015) {
+        this.npm.devDependencies.push('babel-eslint');
+      }
+    }
+  },
+
   writing: {
     eslint: function () {
       var eslintrc;
@@ -60,24 +77,14 @@ module.exports = generators.Base.extend({
       }
       else if (this.options.config === 'airbnb') {
         var config = 'airbnb/legacy';
-
         if (this.options.react) {
           config = 'airbnb';
         } else if (this.options.es2015) {
           config = 'airbnb/base';
         }
-
         eslintrc = {
           extends: config
         }
-
-        /*// Disable
-        extend(eslintrc, {
-          rules: {
-            comma-dangle: 0,
-            id-length: 0
-          }
-        });*/
       }
 
       this.fs.writeJSON(this.destinationPath('.eslintrc'), eslintrc);
@@ -108,38 +115,39 @@ module.exports = generators.Base.extend({
       this.fs.copy(this.templatePath('eslintignore'), this.destinationPath('.eslintignore'));
     },
 
-    package: function () {
+    packageJson: function () {
       var pkg = this.fs.readJSON(this.destinationPath('package.json'), {});
 
-      extend(pkg, {
-        peerDependencies: {
-          'eslint': '*'
-        }
-      });
-
-      if (this.options.config === 'airbnb') {
-        extend(pkg, {
-          devDependencies: {
-            'eslint-config-airbnb': '*'
-          }
-        });
-      }
       if (this.options.react) {
         extend(pkg, {
-          devDependencies: {
-            'babel-eslint': '*',
-            'eslint-plugin-react': '*'
+          scripts: {
+            "lint": "eslint --ext js --ext jsx src test",
           }
         });
-      } else if (this.options.es2015) {
+      } else {
         extend(pkg, {
-          devDependencies: {
-            'babel-eslint': '*'
+          scripts: {
+            "lint": "eslint --ext js src test",
           }
         });
       }
 
       this.fs.writeJSON(this.destinationPath('package.json'), pkg);
+    },
+
+    testPackageJson: function () {
+      var pkg = null;
+      if (this.options.skipInstall){
+        pkg = this.fs.readJSON(this.destinationPath('package.json'), {});
+        for (var i in this.npm.devDependencies) {
+          extend(pkg, JSON.parse('{ "devDependencies": { "' + this.npm.devDependencies[i] + '": "*" } }'));
+        }
+        this.fs.writeJSON(this.destinationPath('package.json'), pkg);
+      }
     }
+  },
+
+  install: function () {
+    this.npmInstall(this.npm.devDependencies, { saveDev: true });
   }
 });

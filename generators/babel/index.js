@@ -11,6 +11,29 @@ module.exports = generators.Base.extend({
       defaults: false,
       desc: 'Use React syntax'
     });
+
+    this.option('browserify', {
+      required: false,
+      defaults: true,
+      desc: 'Use React syntax'
+    });
+  },
+
+  initializing: {
+    setDevDependencies: function () {
+      this.npm = {
+        devDependencies: []
+      };
+      if (this.options.browserify) {
+        this.npm.devDependencies.push('babelify');
+      } else {
+        this.npm.devDependencies.push('babel');
+      }
+      this.npm.devDependencies.push('babel-preset-es2015');
+      if (this.options.react) {
+        this.npm.devDependencies.push('babel-preset-react');
+      }
+    }
   },
 
   writing: {
@@ -24,25 +47,19 @@ module.exports = generators.Base.extend({
       );
     },
 
-    package: function () {
-      var pkg = this.fs.readJSON(this.destinationPath('package.json'), {});
-
-      extend(pkg, {
-        devDependencies: {
-          'babel-core': '*',
-          'babel-preset-es2015': '*',
+    testPackageJson: function () {
+      var pkg = null;
+      if (this.options.skipInstall){
+        pkg = this.fs.readJSON(this.destinationPath('package.json'), {});
+        for (var i in this.npm.devDependencies) {
+          extend(pkg, JSON.parse('{ "devDependencies": { "' + this.npm.devDependencies[i] + '": "*" } }'));
         }
-      });
-
-      if (this.options.react) {
-        extend(pkg, {
-          devDependencies: {
-            'babel-preset-react': '*'
-          }
-        });
+        this.fs.writeJSON(this.destinationPath('package.json'), pkg);
       }
-
-      this.fs.writeJSON(this.destinationPath('package.json'), pkg);
     }
+  },
+
+  install: function () {
+    this.npmInstall(this.npm.devDependencies, { saveDev: true });
   }
 });
