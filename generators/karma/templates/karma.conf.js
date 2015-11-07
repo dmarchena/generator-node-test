@@ -16,6 +16,9 @@ module.exports = function(config) {
       'jasmine',<%
       } else if (testFramework === 'mocha') { %>
       'mocha',<%
+        if (chai) { %>
+      'chai',<%
+        }
       } %>
     ],
 
@@ -37,16 +40,31 @@ module.exports = function(config) {
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {<%
       if (react) { %>
-      'src/**/*.js*': ['browserify', 'coverage'],<%
+      'src/**/*.js*': [
+        'browserify',<%
+        if (coverage) { %>
+        'coverage',<%
+        } %>
+      ],<%
       } else { %>
-      'src/**/*.js': ['browserify', 'coverage'],<%
+      'src/**/*.js': [
+        'browserify',<%
+        if (coverage) { %>
+        'coverage',<%
+        } %>
+      ],<%
       } %>
       'test/**/*.spec.js': ['browserify'],
     },
 
     browserify: {
       debug: true,
-      extensions: ['.js', '.jsx'],
+      extensions: [
+        '.js',<%
+      if (react) { %>
+        '.jsx',<%
+      } %>
+      ],
       transform: [<%
       if (es2015 || react) { %>
         'babelify',<%
@@ -83,20 +101,28 @@ module.exports = function(config) {
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress', 'coverage'],
-
+    reporters: [
+      'progress',<%
+      if (coverage) { %>
+      'coverage',<%
+      } %>
+    ],
+    <% if (coverage) { %>
     coverageReporter: {
-        instrumenters: { 'istanbul-react': require( 'istanbul-react') },
-        instrumenter: {
-            'src/**/*.{js,jsx}': [ 'istanbul-react' ]
-        },
-        reporters: [
-            { type: 'text' },
-            { type: 'html', dir: 'coverage', subdir: 'reports' },
-            { type: 'lcov', dir: 'coverage', subdir: 'coveralls' }
-        ]
+      dir: 'coverage',
+      reporters: [<%
+      if (covReporters.indexOf('console') > -1) { %>
+        { type: 'text' },<%
+      }
+      if (covReporters.indexOf('html') > -1) { %>
+        { type: 'html', subdir: 'html' },<%
+      }
+      if (covReporters.indexOf('coveralls') > -1) { %>
+        { type: 'lcov', subdir: 'coveralls' },<%
+      } %>
+      ]
     },
-
+    <% } %>
 
     // web server port
     port: 9876,
@@ -117,7 +143,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    //browsers: [ process.env.CONTINUOUS_INTEGRATION ? 'Firefox' : 'PhantomJS' ]
+    browsers: [ process.env.CI_TRAVIS ? 'Firefox' : 'PhantomJS' ]
 
 
     // Continuous Integration mode
