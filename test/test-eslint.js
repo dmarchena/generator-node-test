@@ -33,6 +33,14 @@ describe('node-test:eslint', function () {
     assert.fileContent('.eslintrc', /"env": {\s*"node": true\s*}/);
   });
 
+  it('includes eslint dependencies', function () {
+    assert.fileContent('package.json', '"eslint"');
+  });
+
+  it('includes "lint" script in package.json', function () {
+    assert.fileContent('package.json', /"scripts":\s*\{[^\}]*"lint":[^\}]*\}/);
+  });
+
   describe('--es2015', function () {
     before(function (done) {
       runGeneratorWithOptions(done, {
@@ -44,7 +52,7 @@ describe('node-test:eslint', function () {
       assert.fileContent('.eslintrc', /"ecmaFeatures": {\s*"modules": true\s*}/);
     });
     it('includes babel dependencies', function () {
-      assert.fileContent('package.json', 'babel-eslint');
+      assert.fileContent('package.json', '"babel-eslint"');
     });
   });
 
@@ -59,7 +67,10 @@ describe('node-test:eslint', function () {
       assert.fileContent('.eslintrc', /"ecmaFeatures": {\s*"jsx": true\s*}/);
     });
     it('includes react dependencies', function () {
-      assert.fileContent('package.json', 'eslint-plugin-react');
+      assert.fileContent('package.json', '"eslint-plugin-react"');
+    });
+    it('includes jsx in "lint" script', function () {
+      assert.fileContent('package.json', /"scripts":\s*\{[^\}]*"lint":[^,\}]*jsx[^\}]*\}/);
     });
   });
 
@@ -68,6 +79,9 @@ describe('node-test:eslint', function () {
       runGeneratorWithOptions(done, {
         config: 'airbnb'
       });
+    });
+    it('includes Airbnb\'s dependencies', function () {
+      assert.fileContent('package.json', '"eslint-config-airbnb"');
     });
     it('fills extends with Airbnb\'s legacy rules', function () {
       assert.noFileContent('.eslintrc', /"extends": "eslint:recommended"/);
