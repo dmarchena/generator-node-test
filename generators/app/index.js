@@ -5,7 +5,7 @@ var yeoman = require('yeoman-generator');
 var yosay = require('yosay');
 var _ = require('underscore.string');
 
-var generatorName = 'Testing'
+var generatorName = 'node-test'
 
 module.exports = yeoman.generators.Base.extend({
   initializing: function () {
@@ -13,6 +13,7 @@ module.exports = yeoman.generators.Base.extend({
     this.appname = this.appname || path.basename(process.cwd());
     this.appname = _.camelize(_.slugify(_.humanize(this.appname)));
   },
+
   prompting: function () {
     var done = this.async();
 
@@ -30,13 +31,15 @@ module.exports = yeoman.generators.Base.extend({
       type: 'input',
       name: 'description',
       message: 'Please enter a short description of this project',
-      default: 'A project that can'
+      default: 'Generated with generator-node-test!'
     }, {
-      type: 'list',
-      name: 'testRunner',
-      message: 'Which test runner do you want to use?',
-      default: 'gulp',
-      choices: ['gulp', 'karma']
+      type: 'checkbox',
+      name: 'syntax',
+      message: 'Will you use any special syntax?',
+      choices: [
+        { name: 'es2015', checked: true },
+        { name: 'react' }
+      ]
     }, {
       type: 'list',
       name: 'testFramework',
@@ -44,17 +47,25 @@ module.exports = yeoman.generators.Base.extend({
       default: 'mocha',
       choices: ['jasmine', 'mocha']
     }, {
+      type: 'confirm',
+      name: 'chai',
+      message: 'Do you want to use Chai as assertion library?',
+      default: true,
+      when: function(answers){
+        return answers.testFramework === 'mocha';
+      }
+    }, {
       type: 'list',
-      name: 'assertionLibrary',
-      message: 'Do you want to use any assertion library?',
+      name: 'chaiInteface',
+      message: 'Which assertion style do you want to use in your tests?',
       default: 'should',
       choices: [
-        //'chai',
-        'should',
-        'none'
+        'assert',
+        'expect',
+        'should'
       ],
       when: function(answers){
-        return answers.testRunner === 'mocha';
+        return answers.chai === true;
       }
     }, {
       type: 'confirm',
@@ -68,13 +79,11 @@ module.exports = yeoman.generators.Base.extend({
       default: true
     }, {
       type: 'checkbox',
-      name: 'coverage',
-      message: 'Choose your coverage tools:',
+      name: 'covReporters',
+      message: 'Choose your coverage reporters:',
       choices: [
-        // new inquirer.Separator("Local:"),
         { name: 'console', checked: true },
         { name: 'html' },
-        // new inquirer.Separator("Web services:"),
         { name: 'coveralls', checked: true }
       ],
       validate: function( answer ) {
@@ -89,71 +98,79 @@ module.exports = yeoman.generators.Base.extend({
     }];
 
     this.prompt(prompts, function (answers) {
-      this.props = answers;
       this.appname = answers.appname;
+      this.answers = answers;
+      this.answers.es2015 = answers.syntax.indexOf('es2015') > -1;
+      this.answers.react = answers.syntax.indexOf('react') > -1;
       done();
     }.bind(this));
   },
+
   default: function () {
+    // EditorConfig
     this.composeWith('testing:editorconfig', {}, {
       local: require.resolve('../editorconfig')
     });
+
+    // Git
+    this.composeWith('testing:git', {
+      options: {
+      }
+    }, {
+      local: require.resolve('../git')
+    });
+
+    // Karma
+    this.composeWith('testing:karma', {
+      options: this.answers
+    }, {
+      local: require.resolve('../karma')
+    });
+
+    // Babel
+    if (this.answers.es2015 || this.answers.react) {
+      this.composeWith('testing:babel', {
+        options: {
+          browserify: true,
+          react: this.answers.react,
+        }
+      }, {
+        local: require.resolve('../babel')
+      });
+    }
+
+    // Travis
+    if (this.answers.travis) {
+      this.composeWith('testing:travis', {
+        options: this.answers
+      }, {
+        local: require.resolve('../travis')
+      });
+    }
+
+    // ESLint
     this.composeWith('testing:eslint', {
       options: {
-        testFramework: this.props.testFramework,
-        config: 'airbnb'
+        es2015: this.answers.es2015,
+        react: this.answers.react,
+        testFramework: this.answers.testFramework,
+        config: 'airbnb',
       }
     }, {
       local: require.resolve('../eslint')
     });
   },
+
   writing: {
-    app: function () {
-      console.log('Writing app');
-      /*this.fs.copy(
-        this.templatePath('_package.json'),
-        this.destinationPath('package.json')
+    packagejson: function () {
+      this.fs.copyTpl(
+        this.templatePath('package.json'),
+        this.destinationPath('package.json'),
+        {
+          appname: this.answers.appname,
+          description: this.answers.description,
+        }
       );
-      this.fs.copy(
-        this.templatePath('_bower.json'),
-        this.destinationPath('bower.json')
-      );*/
     },
-
-    projectfiles: function () {
-      console.log('Writing projectfiles');
-      /*
-      this.fs.copy(
-        this.templatePath('editorconfig'),
-        this.destinationPath('.editorconfig')
-      );
-      this.fs.copy(
-        this.templatePath('jshintrc'),
-        this.destinationPath('.jshintrc')
-      );*/
-    }
-  },
-
-  install: function () {
-    //this.installDependencies();
-    /*if (this.props.testRunner === 'karma') {
-      this.npmInstall(['karma'], { 'saveDev': true });
-      if (this.props.testFramework === 'jasmine') {
-        this.npmInstall(['jasmine-core'], { 'saveDev': true });
-        this.npmInstall(['karma-jasmine'], { 'saveDev': true });
-      } else if (this.props.testFramework === 'mocha') {
-        this.npmInstall(['mocha'], { 'saveDev': true });
-        this.npmInstall(['karma-mocha'], { 'saveDev': true });
-      }
-    }
-    else if (this.props.testRunner === 'gulp') {
-      if (this.props.testFramework === 'jasmine') {
-        // this.npmInstall(['jasmine-core'], { 'saveDev': true });
-        this.npmInstall(['gulp-jasmine'], { 'saveDev': true });
-      } else if (this.props.testFramework === 'mocha') {
-        //this.npmInstall(['mocha'], { 'saveDev': true });
-        this.npmInstall(['gulp-mocha'], { 'saveDev': true });
-      }
-    }*/
   }
 });
