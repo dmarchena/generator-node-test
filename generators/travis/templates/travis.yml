@@ -3,6 +3,8 @@ node_js:
   - "iojs"
   - "0.12"
   - "0.10"
+env:
+  - CI_TRAVIS=true
 branches:
   only:
     - master
