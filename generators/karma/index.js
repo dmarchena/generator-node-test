@@ -50,6 +50,9 @@ module.exports = generators.Base.extend({
   },
 
   initializing: {
+    /**
+     * Retrieve devDependencies according to sub-generator options
+     */
     setDevDependencies: function () {
       this.npm = {
         devDependencies: [
@@ -108,6 +111,9 @@ module.exports = generators.Base.extend({
       this.fs.writeJSON(this.destinationPath('package.json'), pkg);
     },
 
+    /**
+     * Overwrite package.json in order to make dependencies visible for tests
+     */
     testPackageJson: function () {
       var pkg = null;
       if (this.options.skipInstall){
