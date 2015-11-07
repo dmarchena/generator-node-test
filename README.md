@@ -1,6 +1,6 @@
 # generator-node-test [![Build Status](https://secure.travis-ci.org/dmarchena/generator-node-test.png?branch=develop)](https://travis-ci.org/dmarchena/generator-node-test)
 
-> [Yeoman](http://yeoman.io) generator that scaffolds a TDD-ready node project
+> Yet another [Yeoman](http://yeoman.io) generator that scaffolds a TDD-ready node project
 
 
 ## Installation
