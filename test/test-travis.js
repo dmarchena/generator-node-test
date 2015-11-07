@@ -34,7 +34,7 @@ describe('node-test:travis', function () {
       });
     });
     it('a travis script will be added in package.json', function () {
-        assert.fileContent('package.json', /"scripts":\s*\{[^\}]*"test-travis":[^,\}]*karma[^\}]*\}/);
+      assert.fileContent('package.json', /"scripts":\s*\{[^\}]*"test-travis":[^,\}]*karma[^\}]*\}/);
     });
   });
 
@@ -45,7 +45,7 @@ describe('node-test:travis', function () {
       });
     });
     it('a travis script will be added in package.json', function () {
-        assert.fileContent('package.json', /"scripts":\s*\{[^\}]*"test-travis":[^,\}]*gulp[^\}]*\}/);
+      assert.fileContent('package.json', /"scripts":\s*\{[^\}]*"test-travis":[^,\}]*gulp[^\}]*\}/);
     });
   });
 

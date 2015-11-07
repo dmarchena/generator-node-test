@@ -26,6 +26,10 @@ describe('node-test:karma', function () {
     ]);
   });
 
+  it('includes "karma" script in package.json', function () {
+    assert.fileContent('package.json', /"scripts":\s*\{[^\}]*"karma":[^\}]*\}/);
+  });
+
   it('fills the files that should be load in the browser', function () {
     assert.fileContent('karma.conf.js', /files:\s*\[[^\]]*'src\/\*\*\/\*\.js'[^\]]*\]/);
     assert.fileContent('karma.conf.js', /files:\s*\[[^\]]*'test\/\*\*\/\*\.spec\.js'[^\]]*\]/);
@@ -48,8 +52,8 @@ describe('node-test:karma', function () {
     });
 
     it('installs Browserify', function () {
-      assert.fileContent('package.json', /"browserify"/);
-      assert.fileContent('package.json', 'karma-browserify');
+      assert.fileContent('package.json', '"browserify"');
+      assert.fileContent('package.json', '"karma-browserify');
       assert.fileContent('karma.conf.js', /plugins:\s*\[[^\]]*'karma-browserify'[^\]]*\]/);
       assert.fileContent('karma.conf.js', /frameworks:\s*\[[^\]]*'browserify'[^\]]*\]/);
       assert.fileContent('karma.conf.js', /preprocessors:\s*\{[^\}]*'src\/\*\*\/\*\.js'[^\}]*\}/);
@@ -63,7 +67,7 @@ describe('node-test:karma', function () {
         });
       });
       it('adds Babelify', function () {
-        assert.fileContent('package.json', 'babelify');
+        //assert.fileContent('package.json', '"babelify"');
         assert.fileContent('karma.conf.js', /transform:\s*\[[^\]]*'babelify'[^\]]*\]/);
       });
     });
@@ -75,7 +79,7 @@ describe('node-test:karma', function () {
         });
       });
       it('adds Babelify', function () {
-        assert.fileContent('package.json', 'babelify');
+        //assert.fileContent('package.json', '"babelify"');
         assert.fileContent('karma.conf.js', /transform:\s*\[[^\]]*'babelify'[^\]]*\]/);
       });
       it('fills the files that should be load in the browser', function () {
@@ -97,6 +101,55 @@ describe('node-test:karma', function () {
     });
   });
 
+  describe('--coverage', function () {
+    before(function (done) {
+      runGeneratorWithOptions(done, {
+        coverage: true
+      });
+    });
+
+    it('installs the Karma coverage plugin', function () {
+      assert.fileContent('package.json', '"karma-coverage"');
+      assert.fileContent('karma.conf.js', /plugins:\s*\[[^\]]*'karma-coverage'[^\]]*\]/);
+    });
+
+    describe('if "console" is selected as reporter', function () {
+      before(function (done) {
+        runGeneratorWithOptions(done, {
+          coverage: true,
+          covReporters: ['console']
+        });
+      });
+      it('adds the text coverage reporter', function () {
+        assert.fileContent('karma.conf.js', /coverageReporter:\s*\{[^\}]*reporters:\s*\[[^\]]*'text'[^\]]*\][^\}]*\}/);
+      });
+    });
+
+    describe('if "html" is selected as reporter', function () {
+      before(function (done) {
+        runGeneratorWithOptions(done, {
+          coverage: true,
+          covReporters: ['html']
+        });
+      });
+      it('adds the html coverage reporter', function () {
+        assert.fileContent('karma.conf.js', /coverageReporter:\s*\{[^\}]*reporters:\s*\[[^\]]*'html'[^\]]*\][^\}]*\}/);
+      });
+    });
+
+    describe('if "coveralls" is selected as reporter', function () {
+      before(function (done) {
+        runGeneratorWithOptions(done, {
+          coverage: true,
+          covReporters: ['coveralls']
+        });
+      });
+      it('adds the lcov coverage reporter', function () {
+        assert.fileContent('karma.conf.js', /coverageReporter:\s*\{[^\}]*reporters:\s*\[[^\]]*'lcov'[^\]]*\][^\}]*\}/);
+      });
+    });
+  });
+
   describe('if testFramework is Jasmine', function () {
     before(function (done) {
       runGeneratorWithOptions(done, {
@@ -104,8 +157,8 @@ describe('node-test:karma', function () {
       });
     });
     it('installs the Karma adapter', function () {
-      assert.fileContent('package.json', 'karma-jasmine');
-      assert.fileContent('package.json', 'jasmine-core');
+      assert.fileContent('package.json', '"karma-jasmine"');
+      assert.fileContent('package.json', '"jasmine-core"');
       assert.fileContent('karma.conf.js', /frameworks:\s*\[[^\]]*'jasmine'[^\]]*\]/);
       assert.fileContent('karma.conf.js', /plugins:\s*\[[^\]]*'karma-jasmine'[^\]]*\]/);
     });
@@ -118,11 +171,25 @@ describe('node-test:karma', function () {
       });
     });
     it('installs the Mocha adapter', function () {
-      assert.fileContent('package.json', 'karma-mocha');
+      assert.fileContent('package.json', '"karma-mocha"');
       assert.fileContent('package.json', '"mocha"');
       assert.fileContent('karma.conf.js', /frameworks:\s*\[[^\]]*'mocha'[^\]]*\]/);
       assert.fileContent('karma.conf.js', /plugins:\s*\[[^\]]*'karma-mocha'[^\]]*\]/);
     });
+
+    describe('--chai', function () {
+      before(function (done) {
+        runGeneratorWithOptions(done, {
+          testFramework: 'mocha',
+          chai: true
+        });
+      });
+      it('installs the Mocha adapter', function () {
+        assert.fileContent('package.json', '"chai"');
+        assert.fileContent('karma.conf.js', /frameworks:\s*\[[^\]]*'chai'[^\]]*\]/);
+      });
+    });
+
   });
 
 });
