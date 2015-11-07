@@ -31,24 +31,19 @@ module.exports = generators.Base.extend({
       );
     },
 
-    package: function () {
+    packageJson: function () {
       var pkg = this.fs.readJSON(this.destinationPath('package.json'), {});
 
       if (this.options.testRunner === 'karma') {
         extend(pkg, {
-          devDependencies: {
-            scripts: {
-              "test-travis": "karma start --browsers Firefox --single-run",
-            }
+          scripts: {
+            "test-travis": "karma start --single-run",
           }
         });
-      }
-      else if (this.options.testRunner === 'gulp') {
+      } else if (this.options.testRunner === 'gulp') {
         extend(pkg, {
-          devDependencies: {
-            scripts: {
-              "test-travis": "gulp test-travis",
-            }
+          scripts: {
+            "test-travis": "gulp test-travis",
           }
         });
       }
