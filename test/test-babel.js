@@ -22,13 +22,35 @@ describe('node-test:babel', function () {
   it('creates files', function () {
     assert.file([
       '.babelrc',
-      'package.json'
+      'package.json',
     ]);
   });
 
   it('installs dependencies and preset', function () {
-    assert.fileContent('package.json', 'babel-core');
-    assert.fileContent('package.json', 'babel-preset-es2015');
+    assert.fileContent('package.json', '"babelify"');
+    assert.fileContent('package.json', '"babel-preset-es2015"');
+  });
+
+  describe('--browserify', function () {
+    before(function (done) {
+      runGeneratorWithOptions(done, {
+        browserify: true,
+      });
+    });
+    it('installs babelify', function () {
+      assert.fileContent('package.json', '"babelify"');
+    });
+  });
+
+  describe('--no-browserify', function () {
+    before(function (done) {
+      runGeneratorWithOptions(done, {
+        browserify: false,
+      });
+    });
+    it('installs babelify', function () {
+      assert.fileContent('package.json', '"babel"');
+    });
   });
 
   describe('--react', function () {
@@ -39,7 +61,7 @@ describe('node-test:babel', function () {
     });
 
     it('installs react  preset', function () {
-      assert.fileContent('package.json', 'babel-preset-react');
+      assert.fileContent('package.json', '"babel-preset-react"');
       assert.fileContent('.babelrc', /presets:\s*\[[^\]]*'react'[^\]]*\]/);
     });
   });
