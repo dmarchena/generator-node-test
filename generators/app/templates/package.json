@@ -1,0 +1,11 @@
+{
+  "name": "<%= appname %>",
+  "version": "0.1.0",
+  "description": "<%= description %>",
+  "scripts": {
+    "test": "npm run-script lint && npm run-script karma"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "license": "MIT"
+}
