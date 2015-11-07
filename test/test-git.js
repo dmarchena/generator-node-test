@@ -4,10 +4,10 @@ var path = require('path');
 var assert = require('yeoman-generator').assert;
 var helpers = require('yeoman-generator').test;
 
-describe('node-test:github', function () {
+describe('node-test:git', function () {
 
   before(function (done) {
-    helpers.run(path.join(__dirname, '../generators/github'))
+    helpers.run(path.join(__dirname, '../generators/git'))
       .on('end', done);
   });
 
